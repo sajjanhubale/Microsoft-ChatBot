@@ -1,104 +1,42 @@
-
-
-var server = require('websocket').server, http = require('http');
-let properties = require('./properties');
-var apiai = require(properties.apiKey);
-var app = apiai();
+var builder = require('botbuilder');
+var restify = require('restify');
 var Client=require('node-rest-client').Client
-
-var flagIntent=0;
-
-var socket = new server({
-    httpServer: http.createServer().listen(1337)
+var recognizer = require ('recognizer');
+// Setup Restify Server
+var server = restify.createServer();
+server.listen(process.env.port || process.env.PORT || 3978, function() {
+  console.log('%s listening to %s', server.name, server.url);
 });
-var options_auth = { user: properties.username, password: properties.password };
-var client=new Client(options_auth);
-
-socket.on('request', function(request) {
-var connection = request.accept(null, request.origin);
-console.log("client connected");
-connection.on('message', function(message) {
-  console.log(message.utf8Data);
-  var request = app.textRequest(message.utf8Data, {
-  sessionId: properties.sessionId
-  });
-
-  request.on('response', function(response) {
-
-      if(response.result.metadata.intentName=='ResetPassword')
-      {
-        if(flagIntent==0)
-        {
-        connection.sendUTF('Ok... sure, I can help you to reset the password. But before proceeding, I need more details from you.');
-        connection.sendUTF('Please enter the system id.');
-        flagIntent++;
-        setOfQuestions(connection);
-        }
-        else{
-        //  flag=1;
-
-        }
-      }else {
-        if(flagIntent==0)
-        {
-        var send_message='sorry i did not get that';
-        connection.sendUTF(send_message);
-        }
-
-      }
-
-  });
-
-  request.on('error', function(error) {
-  console.log(error);
-  });
-request.end();
-// setTimeout(function() {
-//     connection.sendUTF('this is a websocket example');
-// }, 1000);
+// Create chat bot
+var connector = new builder.ChatConnector({
+  appId: 'wffffwf',
+  appPassword: 'fsfsfsf'
 });
-
-  connection.on('close', function(connection) {
-    console.log('connection closed');
-  });
+var bot = new builder.UniversalBot(connector);
+server.post('/api/messages', connector.listen());
+// You can provide your own model by specifing the 'LUIS_MODEL_URL' environment variable
+// This Url can be obtained by uploading or creating your model from the LUIS portal: https://www.luis.ai/
+var luisUrl="LUIS URL";
+const LuisModelUrl = process.env.LUIS_MODEL_URL || luisURL;
+// Main dialog with LUIS
+var recognizer = new builder.LuisRecognizer(LuisModelUrl);
+var intents = new builder.IntentDialog({ recognizers: [recognizer] })
+bot.dialog('/WELCOME',function(session){
+ session.send("Welcome to Bot!!!");
+ session.beginDialog('/');
 });
-function setOfQuestions(connection)
-{
-connection.on('message', function(message) {
-  if(flagIntent==1)
-  {
-    if(message.utf8Data=='ise' || message.utf8Data=='Ise')
-    {
-
-      console.log("Flag in system info: "+flagIntent);
-        connection.sendUTF("Please enter the client number.");
-        flagIntent++;
-    }
-    else
-    {
-      console.log("Flag in system info: "+flagIntent);
-        connection.sendUTF("You have entred wrong system");
-    }
+bot.dialog('/',intents);
+intents.matches('Greetings',function(session){
+session.send("Hello,How can i help you?");
+});
+intents.matches('getSAPData',function(session){
+session.send("Sure, we can provide requested details");
+ accessODataService(session);
+});
+ function accessODataService(session){ // execute any function in SAP by calling Odata services
+  var OdataUrl="Odata service URL";
+  client.get(OdataUrl,function(data,response){
+   session.send(data);
+   session.beginDialog('/');
+   });
   }
-});
-
-connection.on('message', function(message) {
-if(flagIntent==2)
-{
-    if(message.utf8Data=='100' || message.utf8Data=='200')
-    {
-      flagIntent++;
-      console.log("Flag in client info: "+flagIntent);
-        connection.sendUTF("Please enter your userid.");
-    }
-    else
-    {
-      console.log("Flag in client info: "+flagIntent);
-        connection.sendUTF("You have entred wrong client number");
-    }
-}
-
-});
-
-}
-
