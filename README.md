@@ -1,4 +1,4 @@
-#### How chatbot helps automate SAP Operations?- Microsoft Bot Builder + Node.js + SAP(Odata Service)
+### How chatbot helps automate SAP Operations?- Microsoft Bot Builder + Node.js + SAP(Odata Service)
 
 The rising wave of Artificial Intelligence (AI) in the last couple of years has given a massive push to the idea if conversational interfaces, commonly known as Chatbots.
 
@@ -8,7 +8,7 @@ These types of chatbots helps customers to automate SAP Operations.
 
 ##### Let’s get started.....
 
-### Microsoft Bot Framework
+#### Microsoft Bot Framework
 
 Microsoft Bot Framework can help us in developing the chat bots, that can be integrated with platforms such as Skype, Slack, Telegram, Email and the Web. 
 
